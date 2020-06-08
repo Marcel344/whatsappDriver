@@ -49,7 +49,6 @@ class WhatsappForwader(QThread):
                         contactName = unicodedata.normalize(
                             "NFKD", rawContactName)
                         if (not self.contactDict.get(contactName)
-                                and contactName == "Mom"
                                 and contactName != "New group"):
                             currentScrollPos = int(self.driver.execute_script(
                                 "return document.querySelector('div._1qDvT._2wPpw').scrollTop"))
@@ -119,7 +118,6 @@ class WhatsappForwader(QThread):
                         contactName = unicodedata.normalize(
                             "NFKD", rawContactName)
                         if (not self.contactDict.get(contactName)
-                                and contactName == "Mom"
                                 and contactName != "New group"):
                             currentScrollPos = int(self.driver.execute_script(
                                 "return document.querySelector('div._1qDvT._2wPpw').scrollTop"))
