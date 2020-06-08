@@ -49,6 +49,7 @@ class WhatsappForwader(QThread):
                         contactName = unicodedata.normalize(
                             "NFKD", rawContactName)
                         if (not self.contactDict.get(contactName)
+                                and contactName == "Mom"
                                 and contactName != "New group"):
                             currentScrollPos = int(self.driver.execute_script(
                                 "return document.querySelector('div._1qDvT._2wPpw').scrollTop"))
@@ -65,8 +66,8 @@ class WhatsappForwader(QThread):
                                     '//div[@class=\'_3uMse\']').send_keys(message)
                                 time.sleep(0.1)
                                 if not self.isPreviewMode:
-                                    self.driver.find_elements_by_xpath(
-                                        '//div[@class=\'_1JNuk\']')[1].click()
+                                    self.driver.find_element_by_xpath(
+                                        '//button[@class=\'_1U1xa\']/span[1]').click() #send button
                                 self.contactDict[contactName] = 1
                                 self.addContact([contactName])
                                 self.strContactSignal.emit(contactName)
@@ -118,46 +119,58 @@ class WhatsappForwader(QThread):
                         contactName = unicodedata.normalize(
                             "NFKD", rawContactName)
                         if (not self.contactDict.get(contactName)
+                                and contactName == "Mom"
                                 and contactName != "New group"):
+                            currentScrollPos = int(self.driver.execute_script(
+                                "return document.querySelector('div._1qDvT._2wPpw').scrollTop"))
                             message = self.formatMessage(
                                 self.Message, contactName)
                             element.click()  # Click on the contact
                             time.sleep(0.1)
+                            try :
+                                self.driver.find_elements_by_xpath(
+                                    '//div/div[@class=\'PVMjB\' and 2]')[1].click()  # Send Media button
+                                time.sleep(1)
+                                imageBtn = self.driver.find_elements_by_xpath(
+                                    '//button[@class=\'_1dxx-\']')[0]
+                                time.sleep(1)
+                                imageInput = imageBtn.find_element_by_tag_name(
+                                                                            'input')
+                                imageInput.send_keys(
+                                    self.ImagePath)  # Path to media
+                                time.sleep(2)
+                                textInput = self.driver.find_elements_by_xpath(
+                                    '//div[@class=\'_3FRCZ copyable-text selectable-text\']')[0]
+                                # text to send goes here
+                                textInput.send_keys(message)
+                                time.sleep(0.1)
+                                if not self.isPreviewMode:
+                                    self.driver.find_element_by_xpath(
+                                        '//div[@class=\'_3y5oW _3qMYG\']').click()  # This is the Send Button
+                                self.contactDict[contactName] = 1
+                                self.addContact([contactName])
+                                self.strContactSignal.emit(contactName)
+                                self.updatePBsignal.emit(len(self.contactDict))
+                                time.sleep(1)
+                            
+                            except exceptions.NoSuchElementException as e :
+                                self.contactDict[contactName] = 1 # contact was blocked and the input field was not found
+                                pass
+
                             self.driver.find_elements_by_xpath(
-                                '//div/div[@class=\'rAUz7\' and 2]')[1].click()  # Send Media button
-                            time.sleep(1)
-                            imageBtn = self.driver.find_elements_by_xpath(
-                                '//button[@class=\'_1azEi\']')[0]
-                            time.sleep(1)
-                            imageInput = imageBtn.find_element_by_tag_name(
-                                                                           'input')
-                            imageInput.send_keys(
-                                self.ImagePath)  # Path to media
-                            time.sleep(2)
-                            textInput = self.driver.find_elements_by_xpath(
-                                '//div[@class=\'_2S1VP copyable-text selectable-text\']')[0]
-                            # text to send goes here
-                            textInput.send_keys(message)
+                                '//div[@class=\'PVMjB\']')[1].click()
                             time.sleep(0.1)
-                            if not self.isPreviewMode:
-                                self.driver.find_element_by_xpath(
-                                    '//div[@class=\'_3hV1n yavlE\']').click()  # This is the Send Button
-                            self.contactDict[contactName] = 1
-                            self.addContact([contactName])
-                            self.strContactSignal.emit(contactName)
-                            self.updatePBsignal.emit(len(self.contactDict))
-                            time.sleep(1)
-                            self.driver.find_elements_by_xpath(
-                                '//div[@class=\'rAUz7\' and 2]/div[1]/span[1]')[1].click()
-                            time.sleep(0.3)
+                            self.driver.execute_script(
+                                f"document.querySelector('div._1qDvT._2wPpw').scrollTop += {currentScrollPos-200}")
+                            time.sleep(0.1)
                             elements = self.driver.find_elements_by_xpath(
-                                '//div[2]/div[1]/div[1]/div[@class=\'_2wP_Y\' and 5]/div[1]/div[@class=\'_2EXPL\' and 1]/div[@class=\'_3j7s9\' and 2]')
+                                '//div[2]/div[1]/div[@class=\'-GlrD _2xoTX\' and 1]/div[@class=\'_210SC\' and 19]/div[1]/div[@class=\'eJ0yJ\' and 1]/div[2]')
 
                         else:
                             self.driver.execute_script(
-                                f"document.querySelector('div._1vDUw._2sNbV').scrollTop += {scrollValue}")
+                                f"document.querySelector('div._1qDvT._2wPpw').scrollTop += {scrollValue}")
                             elements = self.driver.find_elements_by_xpath(
-                                '//div[2]/div[1]/div[1]/div[@class=\'_2wP_Y\' and 5]/div[1]/div[@class=\'_2EXPL\' and 1]/div[@class=\'_3j7s9\' and 2]')
+                                '//div[2]/div[1]/div[@class=\'-GlrD _2xoTX\' and 1]/div[@class=\'_210SC\' and 19]/div[1]/div[@class=\'eJ0yJ\' and 1]/div[2]')
 
                     except exceptions.StaleElementReferenceException as e:
                         pass
