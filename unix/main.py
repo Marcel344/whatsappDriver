@@ -8,6 +8,8 @@ import json
 import os
 import csv
 import forwader
+import globalVariables as variables
+import shutil
 
 class driver(Qt.QWidget):
     def __init__(self):
@@ -18,17 +20,20 @@ class driver(Qt.QWidget):
         self.imgPath = ""
         self.Message = ""
         self.Forwards = ""
-        self.isFileLoaded = False
+        self.errorWindow = errorWindow()
         self.loadedJsonFile = None
         self.loadedCsvFile = None
+        self.importedNamesCsvFile = None
         self.contactDict = {}
+        self.importedContactDict = {}
+        self.remainingContactDict = {}
         self.WhatsappForwader = forwader.WhatsappForwader()
         self.WhatsappForwader.strContactSignal.connect(self.appendName)
         self.WhatsappForwader.updatePBsignal.connect(self.updatePB)
         self.loadRecordBtn.clicked.connect(self.load_record)
         self.startBtn.clicked.connect(self.runThread)
         self.imageBtn.clicked.connect(self.chooseImg)
-        self.errorWindow = errorWindow()
+        self.importNamesBtn.clicked.connect(self.importNames)
         self.recordList.currentRowChanged.connect(self.enableLoadBtn)
         self.searchTxt.textChanged.connect(self.searchContacts)
         if (not os.path.isdir('records')):
@@ -54,11 +59,12 @@ class driver(Qt.QWidget):
         self.forwardsTxt.setStyleSheet(widgetsStyleSheet)
         self.messageTxt.setStyleSheet(widgetsStyleSheet)
         self.imageBtn.setStyleSheet(btnStyleSheet)
+        self.importNamesBtn.setStyleSheet(btnStyleSheet)
         self.startBtn.setStyleSheet(btnStyleSheet)
         self.getFiles()
+        self.show()
 
     def runThread(self):
-
         self.Message = self.messageTxt.toPlainText()
         self.Forwards = self.forwardsTxt.toPlainText()
 
@@ -72,16 +78,18 @@ class driver(Qt.QWidget):
                 "Please set the number of forwards (number of contacts to message)")
             self.errorWindow.show()
 
-        elif int(self.Forwards) < 1:
+        elif (not self.is_number(self.Forwards)) or int(self.Forwards) < 1:
             self.errorWindow.setErrorMsg(
                 "Please enter a valid number for the forwards field")
             self.errorWindow.show()
 
-        elif (self.isFileLoaded):
+        elif (self.loadedCsvFile != None and self.loadedJsonFile != None and self.importedNamesCsvFile == None):
             self.WhatsappForwader.setForwards(self.Forwards)
             self.WhatsappForwader.setImagePath(self.imgPath)
             self.WhatsappForwader.setMessage(self.Message)
             self.WhatsappForwader.setFileName(self.loadedFileName)
+            self.WhatsappForwader.setContactMode(variables.NEW_NAMES)
+            self.MODE = variables.NEW_NAMES
             self.WhatsappForwader.setContactDict(self.contactDict)
             self.WhatsappForwader.setPreviewMode(
                 self.previewCheckBox.isChecked())
@@ -89,21 +97,71 @@ class driver(Qt.QWidget):
             self.startBtn.setStyleSheet(
             "background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
 
+        elif (self.loadedCsvFile == None and self.loadedJsonFile == None and self.importedNamesCsvFile != None):
+            currentDate = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+            os.makedirs(f'records/{currentDate}')
+            jsonFile = open(f'records/{currentDate}/record.json', 'w+')
+            if self.importedNamesCsvFile != None:
+                open(f'records/{currentDate}/importedNames.csv', 'w+')
+                shutil.copy2(self.importedNamesCsvFile.name, f'records/{currentDate}/importedNames.csv')
+            jsonData = {
+                "date": currentDate,
+                "Forwards": self.Forwards,
+                "Message": self.Message,
+                "imagePath": self.imgPath,
+                "importedNames": 'False' if self.importedNamesCsvFile == None else 'True'
+            }
+            json.dump(jsonData, jsonFile)
+            self.progressBar.setVisible(True)
+            self.progressLbl.setVisible(True)
+            self.WhatsappForwader.setContactMode(variables.IMPORTED_NAMES)
+            self.MODE = variables.IMPORTED_NAMES
+            self.progressLbl.setText(f"0/{self.Forwards}")
+            self.progressBar.setMaximum(int(self.Forwards))
+            self.progressBar.setMinimum(0)
+            self.progressBar.setValue(len(self.importedContactDict))
+            self.WhatsappForwader.setForwards(self.Forwards)
+            self.WhatsappForwader.setImagePath(self.imgPath)
+            self.WhatsappForwader.setContactDict(self.importedContactDict)
+            self.WhatsappForwader.setMessage(self.Message)
+            self.WhatsappForwader.setFileName(currentDate)
+            self.WhatsappForwader.loadCsvFile()
+            self.WhatsappForwader.setPreviewMode(
+                self.previewCheckBox.isChecked())
+            self.WhatsappForwader.start()
+            self.startBtn.setStyleSheet(
+            "background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
+
+        elif (self.loadedCsvFile != None and self.loadedJsonFile != None and self.importedNamesCsvFile != None):
+            self.WhatsappForwader.setForwards(self.Forwards)
+            self.WhatsappForwader.setImagePath(self.imgPath)
+            self.WhatsappForwader.setMessage(self.Message)
+            self.WhatsappForwader.setFileName(self.loadedFileName)
+            self.WhatsappForwader.setContactMode(variables.IMPORTED_NAMES)
+            self.MODE = variables.IMPORTED_NAMES
+            self.WhatsappForwader.setContactDict(self.remainingContactDict)
+            self.WhatsappForwader.setPreviewMode(
+                self.previewCheckBox.isChecked())
+            self.WhatsappForwader.start()
+            self.startBtn.setStyleSheet(
+            "background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
 
         else:
             currentDate = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
             os.makedirs(f'records/{currentDate}')
             jsonFile = open(f'records/{currentDate}/record.json', 'w+')
-
             jsonData = {
                 "date": currentDate,
                 "Forwards": self.Forwards,
                 "Message": self.Message,
-                "imagePath": self.imgPath
+                "imagePath": self.imgPath,
+                "importedNames": 'False' if self.importedNamesCsvFile == None else 'True'
             }
             json.dump(jsonData, jsonFile)
             self.progressBar.setVisible(True)
             self.progressLbl.setVisible(True)
+            self.WhatsappForwader.setContactMode(variables.NEW_NAMES)
+            self.MODE = variables.NEW_NAMES
             self.progressLbl.setText(f"0/{self.Forwards}")
             self.progressBar.setMaximum(int(self.Forwards))
             self.progressBar.setMinimum(0)
@@ -120,51 +178,88 @@ class driver(Qt.QWidget):
             "background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
 
     def load_record(self):
-        if not self.isFileLoaded:
-            if (self.recordList.currentItem()):
-                self.isFileLoaded = True
-                self.loadRecordBtn.setText("unload")
-                self.loadedFileName = str(self.recordList.currentItem().text())
-                self.loadedJsonFile = open(
-                    f'records/{self.loadedFileName}/record.json', 'r')
-                self.loadedCsvFile = open(
-                    f'records/{self.loadedFileName}/record.csv', 'r')
-                data = json.load(self.loadedJsonFile)
-                self.messageTxt.setText(data["Message"])
-                self.forwardsTxt.setText(data["Forwards"])
-                self.imgPath = data["imagePath"]
+        if self.importedNamesCsvFile == None :
+            if self.loadedCsvFile == None:
+                if (self.recordList.currentItem()):
+                    self.loadRecordBtn.setText("unload")
+                    self.loadedFileName = str(self.recordList.currentItem().text())
+                    self.loadedJsonFile = open(
+                        f'records/{self.loadedFileName}/record.json', 'r')
+                    self.loadedCsvFile = open(
+                        f'records/{self.loadedFileName}/record.csv', 'r')
+                    data = json.load(self.loadedJsonFile)
+                    self.messageTxt.setText(data["Message"])
+                    self.forwardsTxt.setText(data["Forwards"])
+                    self.imgPath = data["imagePath"]
 
-                if self.imgPath != "":
-                    self.imageLbl.setPixmap(Qt.QPixmap(self.imgPath))
-                self.disableInputs()
-                self.populateContactList()
-                forwards = int(data["Forwards"])
-                self.Forwards = forwards
-                self.progressBar.setMaximum(forwards)
-                self.progressBar.setMinimum(0)
-                self.progressBar.setValue(len(self.contactDict))
-                self.progressLbl.setText(f"{len(self.contactDict)}/{forwards}")
-                self.progressBar.setVisible(True)
-                self.progressLbl.setVisible(True)
+                    if data["importedNames"] == "True" :
+                        self.importedNamesCsvFile = open(
+                            f'records/{self.loadedFileName}/importedNames.csv', 'r')
+                        self.forwardsTxt.setText(data["Forwards"])
 
+                    if self.imgPath != "":
+                        self.imageLbl.setPixmap(Qt.QPixmap(self.imgPath))
+                    self.disableInputs()
+                    self.populateContactList()
+                    forwards = int(data["Forwards"])
+                    self.Forwards = forwards
+                    self.progressBar.setMaximum(forwards)
+                    self.progressBar.setMinimum(0)
+                    self.progressBar.setValue(len(self.contactDict))
+                    self.progressLbl.setText(f"{len(self.contactDict)}/{forwards}")
+                    self.progressBar.setVisible(True)
+                    self.progressLbl.setVisible(True)
+
+            else:
+                self.enableInputs()
+                self.loadRecordBtn.setText("load")
         else:
-            self.isFileLoaded = False
             self.enableInputs()
             self.loadRecordBtn.setText("load")
+        
 
     def disableInputs(self):
+        btnDisabledStyleSheet = "background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;"
         self.forwardsTxt.setEnabled(False)
         self.messageTxt.setEnabled(False)
-        self.imageBtn.setStyleSheet(
-            "background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
+        self.imageBtn.setStyleSheet(btnDisabledStyleSheet)
         self.imageBtn.setEnabled(False)
+        self.importNamesBtn.setStyleSheet(btnDisabledStyleSheet)
+        self.importNamesBtn.setEnabled(False)
         self.progressBar.setVisible(True)
         self.progressLbl.setVisible(True)
+
 
     def enableLoadBtn(self):
         self.loadRecordBtn.setStyleSheet(
             "background-color: white;  border: 1px solid #139e2d; border-radius: 10px; font-size: 12px;color: #139e2d;text-align: center;")
         self.loadRecordBtn.setEnabled(True)
+        self.forwardsTxt.setEnabled(True)
+        self.forwardsTxt.setText("")
+
+
+    def disableLoadBtn(self):
+        self.loadRecordBtn.setEnabled(False)
+        self.forwardsTxt.setEnabled(False)
+        self.loadRecordBtn.setStyleSheet("background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
+
+    def importNames(self):
+        if (self.importedNamesCsvFile == None):
+            filepicker = filePicker()
+            filePath= filepicker.getFilePath()
+            if filePath != "":
+                self.importedNamesCsvFile = open(
+                        filePath, 'r')
+                self.populateContactList()
+                self.disableLoadBtn()
+                self.forwardsTxt.setText(str(len(self.importedContactDict)))
+                self.importNamesBtn.setText("Unload")
+        else :
+            self.importedContactDict = {}
+            self.importedNamesCsvFile = None
+            self.contactList.clear()
+            self.importNamesBtn.setText("Targeted Clients")
+            self.enableLoadBtn()
 
     def searchContacts(self):
         # We search for anything that matches the search input in our List of
@@ -180,24 +275,73 @@ class driver(Qt.QWidget):
             else:
                 name.setHidden(False)
 
-    def populateContactList(self):
-        reader = csv.DictReader(self.loadedCsvFile)
-        for row in reader:
-            self.contactDict[row['Name']] = 1
-            item = QtWidgets.QListWidgetItem(row['Name'])
-            self.contactList.addItem(item)
+    def populateContactList(self):  
+        if self.importedNamesCsvFile == None and self.loadedCsvFile != None :
+            reader = csv.DictReader(self.loadedCsvFile)
+            for row in reader:
+                self.contactDict[row['Name']] = 1
+                item = QtWidgets.QListWidgetItem(row['Name'])
+                self.contactList.addItem(item)
+
+        elif self.importedNamesCsvFile != None and self.loadedCsvFile == None :
+            reader = csv.DictReader(self.importedNamesCsvFile)
+            for row in reader:
+                self.importedContactDict[row['Name']] = 1
+                item = QtWidgets.QListWidgetItem(row['Name'])
+                color = Qt.QColor()
+                color.setRgb(236,192,192)
+                item.setBackground(color)
+                self.contactList.addItem(item)
+            
+        elif self.importedNamesCsvFile != None and self.loadedCsvFile != None :
+            reader = csv.DictReader(self.importedNamesCsvFile)
+            readerScanned = csv.DictReader(self.loadedCsvFile)
+            for row in reader:
+                self.importedContactDict[row['Name']] = 1
+            for row in readerScanned:
+                self.contactDict[row['Name']] = 1
+            
+            for key in self.importedContactDict:
+                if self.contactDict.get(key):
+                    item = QtWidgets.QListWidgetItem(key)
+                    color = Qt.QColor()
+                    color.setRgb(195,236,192)
+                    item.setBackground(color)
+                    self.contactList.addItem(item)
+                else :
+                    item = QtWidgets.QListWidgetItem(key)
+                    color = Qt.QColor()
+                    color.setRgb(236,192,192)
+                    self.remainingContactDict[key] = 1
+                    item.setBackground(color)
+                    self.contactList.addItem(item)
 
     @QtCore.pyqtSlot(str, name="strSignal")
     def appendName(self, name):
-        item = QtWidgets.QListWidgetItem(name)
-        self.contactList.addItem(item)
+        if self.MODE == variables.NEW_NAMES:
+            item = QtWidgets.QListWidgetItem(name)
+            self.contactList.addItem(item)
+        elif self.MODE == variables.IMPORTED_NAMES:
+            listElement = self.contactList.findItems(name, QtCore.Qt.MatchExactly)
+            if len(listElement) > 0:
+                color = Qt.QColor()
+                color.setRgb(195,236,192)
+                listElement[0].setBackground(color)
 
     @QtCore.pyqtSlot(int, name="intSignal")
     def updatePB(self, val):
         self.progressBar.setValue(val)
         self.progressLbl.setText(f"{val}/{self.Forwards}")
 
+    def is_number(self, s):
+        try:
+            int(s)
+            return True
+        except ValueError:
+            return False
+
     def enableInputs(self):
+        btnActiveStyleSheet = "background-color: white;  border: 1px solid #139e2d; border-radius: 10px; font-size: 12px;color: #139e2d;text-align: center;"
         self.forwardsTxt.setEnabled(True)
         self.forwardsTxt.setText("")
         self.contactDict = {}
@@ -206,14 +350,21 @@ class driver(Qt.QWidget):
         self.progressLbl.setVisible(False)
         self.progressBar.setValue(0)
         self.messageTxt.setText("")
-        self.imageBtn.setStyleSheet(
-            "background-color: white;  border: 1px solid #139e2d; border-radius: 10px; font-size: 12px;color: #139e2d;text-align: center;")
+        self.imageBtn.setStyleSheet(btnActiveStyleSheet)
         self.imageBtn.setEnabled(True)
+        self.importNamesBtn.setStyleSheet(btnActiveStyleSheet)
+        self.importNamesBtn.setEnabled(True)
         self.imageLbl.setPixmap(Qt.QPixmap(""))
         self.contactList.clear()
         self.imgPath = ""
         self.Forwards = ""
         self.Message = ""
+        self.loadedCsvFile = None
+        self.loadedJsonFile = None
+        self.loadedFileName = None
+        self.importedNamesCsvFile = None
+        self.contactDict = {}
+        self.importedContactDict = {}
 
     def getFiles(self):
         records = os.listdir("records/")
