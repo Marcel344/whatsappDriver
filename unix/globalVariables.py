@@ -1,0 +1,3 @@
+#Contact Types
+NEW_NAMES = 1
+IMPORTED_NAMES = 2
