@@ -9,6 +9,7 @@ import os
 import csv
 import forwader
 import globalVariables as variables
+import connectionThread
 import shutil
 
 class driver(Qt.QWidget):
@@ -21,6 +22,7 @@ class driver(Qt.QWidget):
         self.Message = ""
         self.Forwards = ""
         self.errorWindow = errorWindow()
+        self.connErr = errorWindow()
         self.loadedJsonFile = None
         self.loadedCsvFile = None
         self.importedNamesCsvFile = None
@@ -28,6 +30,8 @@ class driver(Qt.QWidget):
         self.importedContactDict = {}
         self.remainingContactDict = {}
         self.WhatsappForwader = forwader.WhatsappForwader()
+        self.connectionThread = connectionThread.connectionThread()
+        self.connectionThread.connectionInterruptSignal.connect(self.checkConnection)
         self.WhatsappForwader.strContactSignal.connect(self.appendName)
         self.WhatsappForwader.updatePBsignal.connect(self.updatePB)
         self.loadRecordBtn.clicked.connect(self.load_record)
@@ -40,6 +44,7 @@ class driver(Qt.QWidget):
             os.mkdir('records')
         self.setUpViews()
         self.WhatsappForwader.loadWebsite()
+        self.connectionThread.start()
 
     def setUpViews(self):
         baseStyleSheet = "background-color: #cbcbcb; color : black;"
@@ -70,17 +75,17 @@ class driver(Qt.QWidget):
 
         if self.Message == "" and self.imgPath == "":
             self.errorWindow.setErrorMsg(
-                "Please fill in at least one of the two :\n-Image path\n-Text Message\nOtherwise the program will not work")
+                "Please fill in at least one of the two :\n-Image path\n-Text Message\nOtherwise the program will not run")
             self.errorWindow.show()
 
         elif self.Forwards == "":
             self.errorWindow.setErrorMsg(
-                "Please set the number of forwards (number of contacts to message)")
+                "Please set the number of forwards")
             self.errorWindow.show()
 
         elif (not self.is_number(self.Forwards)) or int(self.Forwards) < 1:
             self.errorWindow.setErrorMsg(
-                "Please enter a valid number for the forwards field")
+                "Please enter a valid number of forwards")
             self.errorWindow.show()
 
         elif (self.loadedCsvFile != None and self.loadedJsonFile != None and self.importedNamesCsvFile == None):
@@ -228,6 +233,30 @@ class driver(Qt.QWidget):
         self.importNamesBtn.setEnabled(False)
         self.progressBar.setVisible(True)
         self.progressLbl.setVisible(True)
+
+    @QtCore.pyqtSlot(bool, name="boolSignal")
+    def checkConnection (self, connected):
+        if (not connected):
+            self.connErr.setErrorMsg(
+                    "You appear to be offline, once you're connected to the internet the program will resume automatically")
+            self.connErr.show()
+            self.connErr.okBtn.setVisible(False)
+            self.startBtn.setEnabled(False)
+            self.startBtn.setStyleSheet("background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
+            self.WhatsappForwader.state = False
+            
+        else :
+            self.connErr.close()
+            self.connErr.okBtn.setVisible(True)
+            print(self.WhatsappForwader.isRunning())
+            if not self.WhatsappForwader.isRunning() :
+                self.startBtn.setEnabled(True)
+                self.startBtn.setStyleSheet(
+                "background-color: white;  border: 1px solid #139e2d; border-radius: 10px; font-size: 12px;color: #139e2d;text-align: center;")
+            self.WhatsappForwader.state = True
+
+
+
 
 
     def enableLoadBtn(self):
