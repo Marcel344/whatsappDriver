@@ -7,6 +7,7 @@ import time
 from selenium.common import exceptions
 import unicodedata
 import os
+import random
 import json
 import csv
 import selenium
@@ -24,6 +25,7 @@ class WhatsappForwader(QThread):
         self.contactDict = {}
         self.AllContacts = []
         self.isPreviewMode = True
+        self.withDelay = True
         self.MODE = 0
 
     def run(self):
@@ -70,6 +72,8 @@ class WhatsappForwader(QThread):
                                         self.driver.find_element_by_xpath(
                                             '//div[@class=\'_3uMse\']').send_keys(message)
                                         time.sleep(0.1)
+                                        if self.withDelay : 
+                                            time.sleep(random.randint(30,60))
                                         if not self.isPreviewMode:
                                             self.driver.find_element_by_xpath(
                                                 '//button[@class=\'_1U1xa\']/span[1]').click() #send button
@@ -153,6 +157,8 @@ class WhatsappForwader(QThread):
                                         # text to send goes here
                                         textInput.send_keys(message)
                                         time.sleep(0.1)
+                                        if self.withDelay : 
+                                            time.sleep(random.randint(30,60))
                                         if not self.isPreviewMode:
                                             self.driver.find_element_by_xpath(
                                                 '//div[@class=\'_3y5oW _3qMYG\']').click()  # This is the Send Button
@@ -228,6 +234,8 @@ class WhatsappForwader(QThread):
                                         self.driver.find_element_by_xpath(
                                             '//div[@class=\'_3uMse\']').send_keys(message)
                                         time.sleep(0.1)
+                                        if self.withDelay : 
+                                            time.sleep(random.randint(30,60))
                                         if not self.isPreviewMode:
                                             self.driver.find_element_by_xpath(
                                                 '//button[@class=\'_1U1xa\']/span[1]').click() #send button
@@ -314,6 +322,8 @@ class WhatsappForwader(QThread):
                                         # text to send goes here
                                         textInput.send_keys(message)
                                         time.sleep(0.1)
+                                        if self.withDelay : 
+                                            time.sleep(random.randint(30,60))
                                         if not self.isPreviewMode:
                                             self.driver.find_element_by_xpath(
                                                 '//div[@class=\'_3y5oW _3qMYG\']').click()  # This is the Send Button
@@ -384,6 +394,9 @@ class WhatsappForwader(QThread):
     
     def setContactMode(self, mode):
         self.MODE = mode
+
+    def setIsDelayMode(self, withDelay):
+        self.withDelay = withDelay
 
     def formatMessage(self, msg, contactName):
         msg = msg.replace("\n", Keys.SHIFT+Keys.ENTER+Keys.SHIFT)
