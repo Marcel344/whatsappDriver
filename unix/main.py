@@ -98,6 +98,7 @@ class driver(Qt.QWidget):
             self.WhatsappForwader.setContactDict(self.contactDict)
             self.WhatsappForwader.setPreviewMode(
                 self.previewCheckBox.isChecked())
+            self.WhatsappForwader.setIsDelayMode(self.delayCheckBox.isChecked())
             self.WhatsappForwader.start()
             self.startBtn.setStyleSheet(
             "background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
@@ -133,6 +134,7 @@ class driver(Qt.QWidget):
             self.WhatsappForwader.loadCsvFile()
             self.WhatsappForwader.setPreviewMode(
                 self.previewCheckBox.isChecked())
+            self.WhatsappForwader.setIsDelayMode(self.delayCheckBox.isChecked())
             self.WhatsappForwader.start()
             self.startBtn.setStyleSheet(
             "background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
@@ -148,6 +150,7 @@ class driver(Qt.QWidget):
             self.WhatsappForwader.setPreviewMode(
                 self.previewCheckBox.isChecked())
             self.WhatsappForwader.start()
+            self.WhatsappForwader.setIsDelayMode(self.delayCheckBox.isChecked())
             self.startBtn.setStyleSheet(
             "background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
 
@@ -178,6 +181,7 @@ class driver(Qt.QWidget):
             self.WhatsappForwader.loadCsvFile()
             self.WhatsappForwader.setPreviewMode(
                 self.previewCheckBox.isChecked())
+            self.WhatsappForwader.setIsDelayMode(self.delayCheckBox.isChecked())
             self.WhatsappForwader.start()
             self.startBtn.setStyleSheet(
             "background-color: white;  border: 1px solid #ababab; border-radius: 10px; font-size: 12px;color: #ababab;text-align: center;")
