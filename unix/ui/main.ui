@@ -153,7 +153,7 @@
    <property name="geometry">
     <rect>
      <x>180</x>
-     <y>640</y>
+     <y>620</y>
      <width>141</width>
      <height>31</height>
     </rect>
@@ -166,7 +166,7 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>680</y>
+     <y>690</y>
      <width>121</width>
      <height>20</height>
     </rect>
@@ -254,6 +254,19 @@
    </property>
    <property name="text">
     <string>Targeted Clients</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="delayCheckBox">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>660</y>
+     <width>121</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>  With delay</string>
    </property>
   </widget>
  </widget>
