@@ -9,7 +9,10 @@ from setuptools import setup
 
 APP = ['main.py']
 DATA_FILES = [
-    ('ui',['ui/error.ui','ui/main.ui','ui/warning.png'])
+    ('ui',['ui/error.ui','ui/main.ui','ui/warning.png']),
+    'forwader.py',
+    'globalVariables.py',
+    'connectionThread.py',
     ]
 OPTIONS = {}
 
