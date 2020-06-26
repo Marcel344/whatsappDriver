@@ -1,0 +1,5 @@
+PyQT5==5.14.1
+selenium==3.141.0
+bs4
+lxml
+webdriver_manager
