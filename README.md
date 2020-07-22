@@ -4,7 +4,11 @@
 
 Ever wanted to send text messages to hundreds of poeple but never find the time to do so ? Well i'm here to save your time, with this software, you'll be able to send messages to as many poeple as you like, you could also send images with text and include every contact's name in the message. You can also send messages to a specified group of poeple by specifying a CSV file with the contact names (The contact names must be exact).
 
-I recommend taking a look at these presentations i made before using the software : 
+![image](https://user-images.githubusercontent.com/33400226/88164293-3ba06100-cc14-11ea-8cf0-f8adbc26c4e0.png)
+![image](https://user-images.githubusercontent.com/33400226/88164314-40fdab80-cc14-11ea-8359-fd12450fc429.png)
+
+
+### I recommend taking a look at these presentations i made before using the software : 
 
 Keynote (MacOS) : https://drive.google.com/file/d/1qW96zUVQavnoc-7xsfTYARvh8FOkLD0S/view?usp=sharing
 PowerPoint : https://drive.google.com/file/d/1viDg14gh_Eu-Uj3Ea-1NzAzQtMsVheV-/view?usp=sharing
