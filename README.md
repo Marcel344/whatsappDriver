@@ -2,7 +2,7 @@
 
 
 
-Ever wanted to send text messages to hundreds of poeple but never find the time to do so ? Well i'm here to save your time, with this software, you'll be able to send messages to as many poeple as you like, you could also send images with text and include every contact's name in the message. You can also send messages to a specified group of poeple by specifying a CSV file with the contact names (The contact names must be exact).
+Ever wanted to send text messages to hundreds of poeple but never find the time to do so ? Well i'm here to save your time, with this software, you'll be able to send messages to as many poeple as you like, you could also send images with text and include every contact's name in the message. You can also send messages to a specified group of poeple by specifying a CSV file with the contact names (The contact names must be exact). For a quickstart just go into Unix or Windows folder (depending on your OS) and run pip3 install -r Requirements.txt to install the libraries.
 
 ![image](https://user-images.githubusercontent.com/33400226/88164293-3ba06100-cc14-11ea-8cf0-f8adbc26c4e0.png)
 ![image](https://user-images.githubusercontent.com/33400226/88164314-40fdab80-cc14-11ea-8359-fd12450fc429.png)
