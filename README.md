@@ -11,6 +11,7 @@ Ever wanted to send text messages to hundreds of poeple but never find the time 
 ### I recommend taking a look at these presentations i made before using the software : 
 
 Keynote (MacOS) : https://drive.google.com/file/d/1qW96zUVQavnoc-7xsfTYARvh8FOkLD0S/view?usp=sharing
+
 PowerPoint : https://drive.google.com/file/d/1viDg14gh_Eu-Uj3Ea-1NzAzQtMsVheV-/view?usp=sharing
 
 ## Few Things you should know before you use the program :
