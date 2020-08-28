@@ -10,7 +10,7 @@ Ever wanted to send text messages to hundreds of people but never find the time 
 
 <img width="999" alt="Screen Shot 2020-07-22 at 12 14 24 PM" src="https://user-images.githubusercontent.com/33400226/88164819-f3ce0980-cc14-11ea-8955-2f97e65e0150.png">
 
-### I recommend taking a look at these presentations i made before using the software : 
+### I recommend taking a look at these presentations before using the software : 
 
 Keynote (MacOS) : https://drive.google.com/file/d/1qW96zUVQavnoc-7xsfTYARvh8FOkLD0S/view?usp=sharing
 
